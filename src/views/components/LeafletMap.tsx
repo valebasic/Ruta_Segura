@@ -7,9 +7,11 @@ import type {
   Marker as LeafletMarker,
 } from 'leaflet'
 import { useEffect, useRef } from 'react'
+import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM } from '@/models/constants'
 import type { MapPosition, MapReport } from '@/models/types'
 
-const FACATATIVA: [number, number] = [4.8143, -74.3545]
+export type MapFocus = { center: [number, number]; zoom: number }
+
 
 const colors = {
   ACOSO: '#d946ef',
@@ -20,12 +22,15 @@ const colors = {
 export default function LeafletMap({
   reports = [],
   selectedPosition,
+  focus,
   onPositionChange,
   onError,
   className = '',
 }: {
   reports?: MapReport[]
   selectedPosition?: MapPosition | null
+  /** Vista a mostrar; al cambiar, el mapa se desplaza hasta ahí. */
+  focus?: MapFocus | null
   onPositionChange?: (position: MapPosition) => void
   onError?: () => void
   className?: string
@@ -38,12 +43,14 @@ export default function LeafletMap({
   const reportsRef = useRef(reports)
   const onPositionChangeRef = useRef(onPositionChange)
   const onErrorRef = useRef(onError)
+  const focusRef = useRef(focus)
 
   useEffect(() => {
     onPositionChangeRef.current = onPositionChange
     onErrorRef.current = onError
     reportsRef.current = reports
-  }, [onPositionChange, onError, reports])
+    focusRef.current = focus
+  }, [onPositionChange, onError, reports, focus])
 
   useEffect(() => {
     let active = true
@@ -54,8 +61,8 @@ export default function LeafletMap({
       leafletRef.current = L
 
       const map = L.map(containerRef.current, {
-        center: FACATATIVA,
-        zoom: 14,
+        center: focusRef.current?.center ?? DEFAULT_MAP_CENTER,
+        zoom: focusRef.current?.zoom ?? DEFAULT_MAP_ZOOM,
         zoomControl: true,
         scrollWheelZoom: true,
       })
@@ -106,6 +113,15 @@ export default function LeafletMap({
     if (!L || !layer) return
     renderReports(L, layer, reports)
   }, [reports])
+
+  // Al cambiar el municipio (u otro foco) el mapa se desplaza a esa zona.
+  const focusKey = focus ? `${focus.center[0]},${focus.center[1]},${focus.zoom}` : ''
+  useEffect(() => {
+    const map = mapRef.current
+    if (!map || !focus) return
+    map.flyTo(focus.center, focus.zoom, { duration: 0.8 })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [focusKey])
 
   useEffect(() => {
     const L = leafletRef.current

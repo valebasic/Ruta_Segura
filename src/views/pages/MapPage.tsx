@@ -1,5 +1,10 @@
-import { useState } from 'react'
-import { categories } from '@/models/constants'
+import { useMemo, useState } from 'react'
+import {
+  categories,
+  DEFAULT_MAP_CENTER,
+  DEFAULT_MAP_ZOOM,
+  municipalityCenters,
+} from '@/models/constants'
 import type { Category, CommunityReport, Screen } from '@/models/types'
 import { Button } from '../components/Button'
 import { PageTitle } from '../components/Display'
@@ -29,6 +34,13 @@ export function MapPage({
   reports: CommunityReport[]
 }) {
   const [mapError, setMapError] = useState(false)
+  const focus = useMemo(
+    () => ({
+      center: municipalityCenters[municipality] ?? DEFAULT_MAP_CENTER,
+      zoom: DEFAULT_MAP_ZOOM,
+    }),
+    [municipality],
+  )
 
   return (
     <main className="mx-auto max-w-7xl px-4 pb-28 pt-8 sm:px-6 lg:px-8 lg:pt-10">
@@ -64,6 +76,7 @@ export function MapPage({
         <div className="relative min-h-[590px] overflow-hidden rounded-3xl border border-slate-200 bg-[#e7ece4] shadow-sm">
           <LeafletMap
             reports={reports}
+            focus={focus}
             className="min-h-[590px]"
             onError={() => setMapError(true)}
           />
