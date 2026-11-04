@@ -59,11 +59,22 @@ export default function LeafletMap({
         zoomControl: true,
         scrollWheelZoom: true,
       })
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      // Un mosaico suelto puede fallar por red lenta o límites del proveedor. Solo se
+      // declara el mapa caído si fallan varios seguidos y no ha cargado ninguno.
+      let loadedTiles = 0
+      let failedTiles = 0
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors',
         maxZoom: 19,
       })
-        .on('tileerror', () => onErrorRef.current?.())
+        .on('tileload', () => {
+          loadedTiles += 1
+          failedTiles = 0
+        })
+        .on('tileerror', () => {
+          failedTiles += 1
+          if (loadedTiles === 0 && failedTiles >= 6) onErrorRef.current?.()
+        })
         .addTo(map)
 
       map.on('click', (event) => {

@@ -52,9 +52,12 @@ export function MapPage({
             <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-slate-500">
               Puedes seguir consultando el listado mientras restablecemos esta vista.
             </p>
-            <Button className="mt-6" onClick={() => onNavigate('reports')}>
-              Ir al listado
-            </Button>
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              <Button onClick={() => setMapError(false)}>Reintentar</Button>
+              <Button variant="secondary" onClick={() => onNavigate('reports')}>
+                Ir al listado
+              </Button>
+            </div>
           </div>
         </div>
       ) : (

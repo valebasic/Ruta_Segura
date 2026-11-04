@@ -16,20 +16,20 @@ export async function GET(request: Request) {
     return Response.json({ error: 'Coordenadas inválidas' }, { status: 400 })
   }
 
-  const apiKey = process.env.GEOAPIFY_API_KEY
-  if (!apiKey) {
-    return Response.json({ error: 'Geocodificación no configurada' }, { status: 503 })
-  }
-
   try {
+    // Nominatim (OpenStreetMap): gratuito y sin clave. Su política exige un User-Agent
+    // propio y no más de 1 consulta por segundo.
     const response = await fetch(
-      `https://api.geoapify.com/v1/geocode/reverse?lat=${encodeURIComponent(latitude)}&lon=${encodeURIComponent(longitude)}&format=json&apiKey=${encodeURIComponent(apiKey)}`,
-      { cache: 'no-store', signal: AbortSignal.timeout(8000) },
+      `https://nominatim.openstreetmap.org/reverse?format=jsonv2&addressdetails=0&accept-language=es&lat=${encodeURIComponent(latitude)}&lon=${encodeURIComponent(longitude)}`,
+      {
+        cache: 'no-store',
+        signal: AbortSignal.timeout(8000),
+        headers: { 'User-Agent': 'RutaSegura/1.0 (https://github.com/valebasic/Ruta_Segura)' },
+      },
     )
-    if (!response.ok) throw new Error('Geoapify no respondió correctamente')
+    if (!response.ok) throw new Error('Nominatim no respondió correctamente')
     const data = await response.json()
-    const address = data?.results?.[0]?.formatted
-    if (!address) return Response.json({ address: null })
+    const address = typeof data?.display_name === 'string' ? data.display_name : null
     return Response.json({ address })
   } catch {
     return Response.json({ error: 'No fue posible obtener la dirección' }, { status: 502 })
