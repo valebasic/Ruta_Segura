@@ -1,0 +1,139 @@
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap');
+@import 'leaflet/dist/leaflet.css';
+@import 'tailwindcss';
+
+@theme {
+  --font-sans: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+  --color-violet-950: #29164d;
+  --color-violet-900: #3e216d;
+  --color-violet-800: #56328a;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    min-width: 320px;
+    min-height: 100vh;
+    background: #faf9fd;
+    color: #1e293b;
+    font-family: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+    text-rendering: optimizeLegibility;
+  }
+
+  button,
+  select {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+
+  ::selection {
+    background: #ddd0f0;
+    color: #29164d;
+  }
+}
+
+.figma-custom-code-fragment {
+  display: contents;
+}
+
+.figma-bypass-link {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 2147483647;
+  transform: translateY(-150%);
+  border-radius: 6px;
+  background: #111827;
+  color: #fff;
+  padding: 8px 12px;
+  font:
+    600 14px/1.2 system-ui,
+    sans-serif;
+  text-decoration: none;
+}
+
+.figma-bypass-link:focus {
+  transform: translateY(0);
+}
+
+.map-lines {
+  background-image:
+    linear-gradient(
+      27deg,
+      transparent 44%,
+      rgba(255, 255, 255, 0.32) 45%,
+      rgba(255, 255, 255, 0.32) 47%,
+      transparent 48%
+    ),
+    linear-gradient(
+      153deg,
+      transparent 44%,
+      rgba(255, 255, 255, 0.22) 45%,
+      rgba(255, 255, 255, 0.22) 47%,
+      transparent 48%
+    );
+  background-size: 180px 140px;
+}
+
+.leaflet-container {
+  z-index: 0;
+  font-family: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+}
+
+.ruta-map-marker {
+  position: relative;
+  display: block;
+  width: 34px;
+  height: 34px;
+  transform: rotate(45deg);
+  border: 3px solid #fff;
+  border-radius: 50% 50% 50% 8px;
+  background: var(--marker-color);
+  box-shadow: 0 5px 16px rgb(41 22 77 / 28%);
+}
+
+.ruta-map-marker > span {
+  position: absolute;
+  inset: 9px;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.ruta-map-marker--selected {
+  box-shadow:
+    0 0 0 5px rgb(62 33 109 / 20%),
+    0 5px 16px rgb(41 22 77 / 28%);
+}
+
+.ruta-popup {
+  display: grid;
+  gap: 5px;
+  min-width: 210px;
+  color: #475569;
+  line-height: 1.45;
+}
+
+.ruta-popup strong {
+  color: #29164d;
+  font-size: 14px;
+}
+
+.ruta-popup span,
+.ruta-popup b,
+.ruta-popup small {
+  font-size: 11px;
+}
+
+.ruta-popup b {
+  color: #56328a;
+}
+
+.ruta-popup p {
+  margin: 4px 0;
+}
