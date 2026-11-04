@@ -38,6 +38,17 @@ export const Users: CollectionConfig = {
       required: true,
     },
     {
+      name: 'isDemo',
+      label: 'Cuenta de demostración',
+      type: 'checkbox',
+      defaultValue: false,
+      index: true,
+      access: {
+        create: moderatorFieldAccess,
+        update: moderatorFieldAccess,
+      },
+    },
+    {
       name: 'role',
       type: 'select',
       defaultValue: 'community',

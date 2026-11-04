@@ -88,11 +88,6 @@ export function AuthPage({
               {isRegister ? 'Crear cuenta' : 'Iniciar sesión'} <Icon name="chevron" size={17} />
             </Button>
           </form>
-          {!isRegister && (
-            <p className="mt-3 text-center text-xs text-slate-400">
-              Usuario moderador configurado: Felipe@gmail.com
-            </p>
-          )}
           <p className="mt-7 text-center text-sm text-slate-600">
             {isRegister ? '¿Ya tienes una cuenta?' : '¿Aún no tienes una cuenta?'}{' '}
             <button

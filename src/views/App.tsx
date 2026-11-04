@@ -5,7 +5,7 @@ import { useSessionController } from '@/controllers/useSessionController'
 import { AppHeader, BottomNav } from './components/AppHeader'
 import { AuthPage } from './pages/AuthPage'
 import { MapPage } from './pages/MapPage'
-import { ModerationPage } from './pages/ModerationPage'
+import { MyReportsPage } from './pages/MyReportsPage'
 import { NewReportPage } from './pages/NewReportPage'
 import { ProfilePage } from './pages/ProfilePage'
 import { ReportsPage } from './pages/ReportsPage'
@@ -59,11 +59,10 @@ export default function App() {
           setMunicipality={reports.setMunicipality}
           category={reports.category}
           setCategory={reports.setCategory}
-          reports={reports.filtered}
         />
       )}
       {screen === 'new' && <NewReportPage onNavigate={navigate} />}
-      {screen === 'moderation' && <ModerationPage />}
+      {screen === 'mine' && <MyReportsPage onNavigate={navigate} />}
       {screen === 'profile' && (
         <ProfilePage
           user={session.currentUser}

@@ -22,7 +22,7 @@ export function NewReportPage({ onNavigate }: { onNavigate: (screen: Screen) => 
             Reporte enviado
           </p>
           <h1 className="mx-auto mt-3 max-w-lg text-2xl font-bold leading-tight tracking-[-.025em] text-violet-950 sm:text-3xl">
-            Tu reporte quedó pendiente de revisión por una persona moderadora
+            Tu reporte ya está publicado y la comunidad puede verlo
           </h1>
           <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-slate-500">
             Gracias por aportar. Tu identidad no será visible para la comunidad.
@@ -168,8 +168,8 @@ export function NewReportPage({ onNavigate }: { onNavigate: (screen: Screen) => 
             </span>
             <h2 className="mt-4 font-bold">Tu reporte es anónimo para la comunidad</h2>
             <p className="mt-2 text-xs leading-relaxed text-violet-200">
-              No mostraremos tu nombre ni tu correo. Una persona moderadora revisará el contenido
-              antes de publicarlo.
+              No mostraremos tu nombre ni tu correo. Tu reporte se publica al enviarlo y puedes
+              eliminarlo cuando quieras desde Mis reportes.
             </p>
           </div>
           <Notice />

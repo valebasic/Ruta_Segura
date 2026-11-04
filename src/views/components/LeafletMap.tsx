@@ -1,27 +1,31 @@
 'use client'
 
 import type {
+  Circle as LeafletCircle,
   DivIcon,
   LayerGroup,
   Map as LeafletMapInstance,
   Marker as LeafletMarker,
 } from 'leaflet'
 import { useEffect, useRef } from 'react'
+import { categoryStyles } from '@/models/categories'
 import { DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM } from '@/models/constants'
 import type { MapPosition, MapReport } from '@/models/types'
 
-export type MapFocus = { center: [number, number]; zoom: number }
-
-
-const colors = {
-  ACOSO: '#d946ef',
-  'ILUMINACIÓN DEFICIENTE': '#f59e0b',
-  'ZONA DESOLADA': '#0ea5e9',
+export type MapFocus = {
+  center: [number, number]
+  zoom: number
+  /** Cambia para forzar el desplazamiento aunque el centro sea el mismo. */
+  nonce?: number
 }
+
+export type UserLocation = MapPosition & { accuracy?: number | null }
 
 export default function LeafletMap({
   reports = [],
   selectedPosition,
+  userLocation,
+  radiusKm,
   focus,
   onPositionChange,
   onError,
@@ -29,6 +33,10 @@ export default function LeafletMap({
 }: {
   reports?: MapReport[]
   selectedPosition?: MapPosition | null
+  /** Ubicación real del dispositivo (nunca una ubicación inventada). */
+  userLocation?: UserLocation | null
+  /** Si se indica junto con `userLocation`, dibuja el radio de búsqueda. */
+  radiusKm?: number | null
   /** Vista a mostrar; al cambiar, el mapa se desplaza hasta ahí. */
   focus?: MapFocus | null
   onPositionChange?: (position: MapPosition) => void
@@ -38,9 +46,11 @@ export default function LeafletMap({
   const containerRef = useRef<HTMLDivElement>(null)
   const mapRef = useRef<LeafletMapInstance | null>(null)
   const reportsLayerRef = useRef<LayerGroup | null>(null)
+  const userLayerRef = useRef<LayerGroup | null>(null)
   const selectionMarkerRef = useRef<LeafletMarker | null>(null)
   const leafletRef = useRef<typeof import('leaflet') | null>(null)
   const reportsRef = useRef(reports)
+  const userRef = useRef({ userLocation, radiusKm })
   const onPositionChangeRef = useRef(onPositionChange)
   const onErrorRef = useRef(onError)
   const focusRef = useRef(focus)
@@ -50,7 +60,8 @@ export default function LeafletMap({
     onErrorRef.current = onError
     reportsRef.current = reports
     focusRef.current = focus
-  }, [onPositionChange, onError, reports, focus])
+    userRef.current = { userLocation, radiusKm }
+  }, [onPositionChange, onError, reports, focus, userLocation, radiusKm])
 
   useEffect(() => {
     let active = true
@@ -92,9 +103,10 @@ export default function LeafletMap({
       })
 
       mapRef.current = map
-      const reportsLayer = L.layerGroup().addTo(map)
-      reportsLayerRef.current = reportsLayer
-      renderReports(L, reportsLayer, reportsRef.current)
+      reportsLayerRef.current = L.layerGroup().addTo(map)
+      userLayerRef.current = L.layerGroup().addTo(map)
+      renderReports(L, reportsLayerRef.current, reportsRef.current)
+      renderUser(L, userLayerRef.current, userRef.current.userLocation, userRef.current.radiusKm)
     }
 
     void initialize()
@@ -103,6 +115,7 @@ export default function LeafletMap({
       mapRef.current?.remove()
       mapRef.current = null
       reportsLayerRef.current = null
+      userLayerRef.current = null
       selectionMarkerRef.current = null
     }
   }, [])
@@ -114,8 +127,17 @@ export default function LeafletMap({
     renderReports(L, layer, reports)
   }, [reports])
 
-  // Al cambiar el municipio (u otro foco) el mapa se desplaza a esa zona.
-  const focusKey = focus ? `${focus.center[0]},${focus.center[1]},${focus.zoom}` : ''
+  useEffect(() => {
+    const L = leafletRef.current
+    const layer = userLayerRef.current
+    if (!L || !layer) return
+    renderUser(L, layer, userLocation, radiusKm)
+  }, [userLocation, radiusKm])
+
+  // Al cambiar el foco (municipio, ubicación del usuario, "centrar") el mapa se desplaza.
+  const focusKey = focus
+    ? `${focus.center[0]},${focus.center[1]},${focus.zoom},${focus.nonce ?? 0}`
+    : ''
   useEffect(() => {
     const map = mapRef.current
     if (!map || !focus) return
@@ -176,12 +198,56 @@ function createMarkerIcon(L: typeof import('leaflet'), color: string, selected =
   })
 }
 
+function renderUser(
+  L: typeof import('leaflet'),
+  layer: LayerGroup,
+  location?: UserLocation | null,
+  radiusKm?: number | null,
+) {
+  layer.clearLayers()
+  if (!location) return
+  const point: [number, number] = [location.latitude, location.longitude]
+  if (radiusKm) {
+    const circle: LeafletCircle = L.circle(point, {
+      radius: radiusKm * 1000,
+      color: '#6d28d9',
+      weight: 1.5,
+      dashArray: '6 6',
+      fillColor: '#8b5cf6',
+      fillOpacity: 0.06,
+      interactive: false,
+    })
+    circle.addTo(layer)
+  }
+  if (location.accuracy && location.accuracy > 0 && location.accuracy < 5000) {
+    L.circle(point, {
+      radius: location.accuracy,
+      color: '#2563eb',
+      weight: 1,
+      fillColor: '#3b82f6',
+      fillOpacity: 0.12,
+      interactive: false,
+    }).addTo(layer)
+  }
+  L.marker(point, {
+    icon: L.divIcon({
+      className: '',
+      html: '<span class="ruta-user-dot"></span>',
+      iconSize: [22, 22],
+      iconAnchor: [11, 11],
+    }),
+    zIndexOffset: 1000,
+  })
+    .bindPopup('Tu ubicación actual')
+    .addTo(layer)
+}
+
 function renderReports(L: typeof import('leaflet'), layer: LayerGroup, reports: MapReport[]) {
   layer.clearLayers()
   for (const report of reports) {
     if (!Number.isFinite(report.latitude) || !Number.isFinite(report.longitude)) continue
     const marker = L.marker([report.latitude, report.longitude], {
-      icon: createMarkerIcon(L, colors[report.category]),
+      icon: createMarkerIcon(L, categoryStyles[report.category]?.hex ?? '#6d28d9'),
     })
     marker.bindPopup(createReportPopup(report))
     marker.addTo(layer)
@@ -191,12 +257,13 @@ function renderReports(L: typeof import('leaflet'), layer: LayerGroup, reports: 
 function createReportPopup(report: MapReport) {
   const container = document.createElement('div')
   container.className = 'ruta-popup'
-  const fields: Array<[keyof HTMLElementTagNameMap, string, string?]> = [
-    ['strong', report.reference],
-    ['span', report.municipality],
+  const fields: Array<[keyof HTMLElementTagNameMap, string]> = [
     ['b', report.category],
     ['p', report.description],
   ]
+  if (report.time) fields.push(['small', `Fecha: ${report.time}`])
+  if (report.distance) fields.push(['small', `Distancia: ${report.distance}`])
+  fields.push(['span', `${report.reference} · ${report.municipality}`])
   if (report.address) fields.push(['small', report.address])
   for (const [tag, text] of fields) {
     const element = document.createElement(tag)

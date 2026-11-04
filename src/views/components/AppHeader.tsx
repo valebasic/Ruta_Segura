@@ -21,7 +21,7 @@ export function AppHeader({
     ['reports', 'Reportes'],
     ['map', 'Mapa'],
     ['new', 'Nuevo reporte'],
-    ...(user?.role === 'moderator' ? ([['moderation', 'Moderación']] as [Screen, string][]) : []),
+    ['mine', 'Mis reportes'],
   ]
   return (
     <header className="sticky top-0 z-40 border-b border-slate-200/80 bg-white/95 backdrop-blur">
@@ -59,9 +59,7 @@ export function AppHeader({
             <div className="absolute right-0 top-[52px] w-60 rounded-2xl border border-slate-200 bg-white p-2 shadow-xl">
               <div className="border-b border-slate-100 px-3 py-2.5">
                 <p className="text-sm font-bold text-slate-900">{user?.name || 'Mi cuenta'}</p>
-                <p className="mt-0.5 text-xs text-slate-500">
-                  Rol: {user?.role === 'moderator' ? 'Moderador' : 'Comunidad'}
-                </p>
+                <p className="mt-0.5 truncate text-xs text-slate-500">{user?.email}</p>
               </div>
               <button
                 onClick={() => {
@@ -97,11 +95,12 @@ export function BottomNav({
     { id: 'reports', label: 'Reportes', icon: 'reports' },
     { id: 'map', label: 'Mapa', icon: 'map' },
     { id: 'new', label: 'Nuevo reporte', icon: 'plus' },
+    { id: 'mine', label: 'Mis reportes', icon: 'reports' },
     { id: 'profile', label: 'Perfil', icon: 'user' },
   ]
   return (
     <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white px-2 pb-[max(8px,env(safe-area-inset-bottom))] pt-2 md:hidden">
-      <div className="mx-auto grid max-w-md grid-cols-4">
+      <div className="mx-auto grid max-w-md grid-cols-5">
         {items.map((item) => (
           <button
             key={item.id}

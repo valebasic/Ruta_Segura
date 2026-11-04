@@ -1,6 +1,6 @@
 'use client'
 
-import { FormEvent, useEffect, useState } from 'react'
+import { FormEvent, useEffect, useRef, useState } from 'react'
 import { validateNewReport } from '@/models/validation'
 import type { FormErrors, LocationSource, MapPosition, Taxonomy } from '@/models/types'
 import { reverseGeocode } from '@/services/geoService'
@@ -21,6 +21,8 @@ export function useNewReportController() {
   const [addressStatus, setAddressStatus] = useState('')
   const [locating, setLocating] = useState(false)
   const [submitting, setSubmitting] = useState(false)
+  // Guarda síncrona: un doble clic dispara dos eventos antes de que React pinte el estado.
+  const submittingRef = useRef(false)
   const [taxonomy, setTaxonomy] = useState<Taxonomy>({ municipalities: [], categories: [] })
 
   useEffect(() => {
@@ -111,19 +113,31 @@ export function useNewReportController() {
 
   const submit = async (event: FormEvent) => {
     event.preventDefault()
+    if (submittingRef.current) return
     const validation = validateNewReport({ municipality, reference, category, description, position })
     setErrors(validation)
     if (Object.keys(validation).length || !position) return
 
-    const municipalityId = taxonomy.municipalities.find((item) => item.name === municipality)?.id
-    const categoryId = taxonomy.categories.find((item) => item.name === category)?.id
+    submittingRef.current = true
+    setSubmitting(true)
+    // Si el catálogo aún no terminó de cargar (conexión lenta), se pide de nuevo antes de enviar.
+    let catalog = taxonomy
+    if (!catalog.municipalities.length || !catalog.categories.length) {
+      catalog = await fetchTaxonomy().catch(() => catalog)
+      setTaxonomy(catalog)
+    }
+    const municipalityId = catalog.municipalities.find((item) => item.name === municipality)?.id
+    const categoryId = catalog.categories.find((item) => item.name === category)?.id
     if (!municipalityId || !categoryId) {
       setErrors({ form: 'No fue posible validar el municipio o la categoría' })
+      submittingRef.current = false
+      setSubmitting(false)
       return
     }
 
-    setSubmitting(true)
-    const result = await submitReport({
+    let result: Awaited<ReturnType<typeof submitReport>>
+    try {
+      result = await submitReport({
       latitude: position.latitude,
       longitude: position.longitude,
       accuracy_m: accuracyM,
@@ -133,8 +147,13 @@ export function useNewReportController() {
       description,
       location_source: locationSource,
       reference_point: reference,
-    })
-    setSubmitting(false)
+      })
+    } catch {
+      result = { ok: false, error: 'No hay conexión con el servidor. Intenta de nuevo.' }
+    } finally {
+      submittingRef.current = false
+      setSubmitting(false)
+    }
     if (!result.ok) {
       setErrors({ form: result.error || 'No fue posible enviar el reporte' })
       return

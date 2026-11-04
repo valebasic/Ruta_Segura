@@ -2,12 +2,14 @@ export type Screen =
   | 'register'
   | 'login'
   | 'reports'
+  | 'mine'
   | 'map'
   | 'new'
   | 'profile'
-  | 'moderation'
 
-export type Category = 'ACOSO' | 'ILUMINACIÓN DEFICIENTE' | 'ZONA DESOLADA'
+import type { Category } from './categories'
+
+export type { Category }
 
 export type IconName =
   | 'arrow'
@@ -40,12 +42,18 @@ export type MapReport = {
   reference: string
   description: string
   address?: string | null
+  /** Fecha del reporte, ya formateada. */
+  time?: string
+  /** Distancia a la persona, ya formateada (solo si se conoce su ubicación). */
+  distance?: string | null
 }
 
 export type CommunityReport = MapReport & {
   distance: string | null
+  distanceKm: number | null
   hasCoordinates: boolean
   time: string
+  createdAt: string | null
   status?: string
 }
 

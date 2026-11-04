@@ -1,6 +1,7 @@
 import { normalizeReport } from '@/models/report'
 import type {
   CommunityReport,
+  MapPosition,
   NewReportPayload,
   ServiceResult,
   Taxonomy,
@@ -8,6 +9,21 @@ import type {
 
 export async function fetchReports(): Promise<CommunityReport[]> {
   const response = await fetch('/api/community-reports')
+  if (!response.ok) throw new Error()
+  const data = await response.json()
+  return data.reports.map(normalizeReport)
+}
+
+export async function fetchNearbyReports(
+  origin: MapPosition,
+  radiusKm: number,
+): Promise<CommunityReport[]> {
+  const query = new URLSearchParams({
+    lat: String(origin.latitude),
+    lon: String(origin.longitude),
+    radius_km: String(radiusKm),
+  })
+  const response = await fetch(`/api/community-reports?${query}`)
   if (!response.ok) throw new Error()
   const data = await response.json()
   return data.reports.map(normalizeReport)
@@ -29,18 +45,20 @@ export async function submitReport(payload: NewReportPayload): Promise<ServiceRe
   return { ok: true }
 }
 
-export async function fetchModerationReports(): Promise<CommunityReport[]> {
-  const response = await fetch('/api/moderation-reports')
-  const data = await response.json()
+export async function fetchMyReports(): Promise<CommunityReport[]> {
+  const response = await fetch('/api/my-reports')
+  const data = await response.json().catch(() => ({}))
   if (!response.ok) throw new Error(data.error)
   return data.reports.map(normalizeReport)
 }
 
-export async function updateReportStatus(id: string | number, status: string): Promise<boolean> {
-  const response = await fetch('/api/moderation-reports', {
-    method: 'PATCH',
+export async function deleteMyReport(id: string | number): Promise<ServiceResult> {
+  const response = await fetch('/api/my-reports', {
+    method: 'DELETE',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ id, status }),
+    body: JSON.stringify({ id }),
   })
-  return response.ok
+  const data = await response.json().catch(() => ({}))
+  if (!response.ok) return { ok: false, error: data.error }
+  return { ok: true }
 }

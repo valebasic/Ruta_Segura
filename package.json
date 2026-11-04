@@ -10,7 +10,10 @@
     "format": "oxfmt",
     "generate:importmap": "NODE_OPTIONS=--no-deprecation payload generate:importmap",
     "generate:types": "NODE_OPTIONS=--no-deprecation payload generate:types",
-    "payload": "NODE_OPTIONS=--no-deprecation payload"
+    "payload": "NODE_OPTIONS=--no-deprecation payload",
+    "seed": "NODE_OPTIONS=--no-deprecation payload run scripts/seed-demo.ts",
+    "verify:demo": "NODE_OPTIONS=--no-deprecation payload run scripts/verify-demo.ts",
+    "test": "node --test tests/**/*.test.ts tests/*.test.ts"
   },
   "dependencies": {
     "@payloadcms/db-postgres": "4.0.0-beta.4",

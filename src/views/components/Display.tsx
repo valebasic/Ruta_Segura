@@ -1,13 +1,9 @@
 import type { ReactNode } from 'react'
-import type { Category } from '@/models/types'
+import { categoryStyles, type Category } from '@/models/categories'
 import { Icon } from './Icon'
 
 export function CategoryTag({ category }: { category: Category }) {
-  const style = {
-    ACOSO: 'bg-fuchsia-50 text-fuchsia-800 ring-fuchsia-200',
-    'ILUMINACIÓN DEFICIENTE': 'bg-amber-50 text-amber-800 ring-amber-200',
-    'ZONA DESOLADA': 'bg-sky-50 text-sky-800 ring-sky-200',
-  }[category]
+  const style = categoryStyles[category]?.tag ?? 'bg-slate-50 text-slate-700 ring-slate-200'
   return (
     <span
       className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-extrabold tracking-[.04em] ring-1 ring-inset ${style}`}

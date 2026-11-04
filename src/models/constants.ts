@@ -1,4 +1,4 @@
-import type { Category } from './types'
+import { REPORT_CATEGORIES } from './categories'
 
 export const municipalities = [
   'Facatativá',
@@ -11,7 +11,7 @@ export const municipalities = [
   'Subachoque',
 ]
 
-export const categories: Category[] = ['ACOSO', 'ILUMINACIÓN DEFICIENTE', 'ZONA DESOLADA']
+export const categories = [...REPORT_CATEGORIES]
 
 export const referencePoints: Record<string, string[]> = {
   Facatativá: [
@@ -34,12 +34,6 @@ export const moderationStatusLabel: Record<string, string> = {
   approved: 'APROBADO',
   rejected: 'RECHAZADO',
   hidden: 'OCULTO',
-}
-
-export const moderationActionLabel: Record<string, string> = {
-  approved: 'aprobado',
-  rejected: 'rechazado',
-  hidden: 'oculto',
 }
 
 /** Centro aproximado de cada municipio [latitud, longitud] para centrar el mapa. */

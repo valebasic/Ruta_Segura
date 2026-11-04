@@ -1,4 +1,5 @@
 import type { Access, CollectionConfig } from 'payload'
+import { REPORT_CATEGORIES } from '../models/categories'
 
 const canManage: Access = ({ req }) =>
   req.user?.collection === 'admins' ||
@@ -22,11 +23,7 @@ export const RiskCategories: CollectionConfig = {
       type: 'select',
       required: true,
       unique: true,
-      options: [
-        { label: 'ACOSO', value: 'ACOSO' },
-        { label: 'ILUMINACIÓN DEFICIENTE', value: 'ILUMINACIÓN DEFICIENTE' },
-        { label: 'ZONA DESOLADA', value: 'ZONA DESOLADA' },
-      ],
+      options: REPORT_CATEGORIES.map((name) => ({ label: name, value: name })),
     },
   ],
 }

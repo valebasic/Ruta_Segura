@@ -13,7 +13,7 @@ export function useReportsController(screen: Screen) {
   const [reports, setReports] = useState<CommunityReport[]>([])
 
   useEffect(() => {
-    if (!['reports', 'map'].includes(screen)) return
+    if (screen !== 'reports') return
     fetchReports()
       .then(setReports)
       .catch(() => setReports([]))

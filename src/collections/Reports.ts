@@ -27,6 +27,13 @@ const readReports: Access = ({ req }) => {
 const moderatorOnly: Access = ({ req }) =>
   req.user?.collection === 'admins' || isModerator(req.user)
 
+// Cada persona puede borrar solo sus propios reportes; moderación y administración, cualquiera.
+const deleteOwnOrModerator: Access = ({ req }) => {
+  if (req.user?.collection === 'admins' || isModerator(req.user)) return true
+  if (isAppUser(req.user)) return { owner: { equals: req.user.id } }
+  return false
+}
+
 const protectedField: FieldAccess = ({ req }) =>
   req.user?.collection === 'admins' || isModerator(req.user)
 
@@ -36,7 +43,7 @@ const assignOwnerAndWorkflow: CollectionBeforeChangeHook = ({ data, operation, r
   return {
     ...data,
     owner: req.user.id,
-    status: 'pending',
+    status: 'approved',
   }
 }
 
@@ -49,7 +56,7 @@ export const Reports: CollectionConfig = {
   },
   access: {
     create: ({ req }) => isAppUser(req.user),
-    delete: moderatorOnly,
+    delete: deleteOwnOrModerator,
     read: readReports,
     update: moderatorOnly,
   },
@@ -121,7 +128,7 @@ export const Reports: CollectionConfig = {
       name: 'status',
       type: 'select',
       required: true,
-      defaultValue: 'pending',
+      defaultValue: 'approved',
       index: true,
       options: [
         { label: 'PENDIENTE', value: 'pending' },
@@ -129,6 +136,21 @@ export const Reports: CollectionConfig = {
         { label: 'RECHAZADO', value: 'rejected' },
         { label: 'OCULTO', value: 'hidden' },
       ],
+      access: {
+        create: protectedField,
+        update: protectedField,
+      },
+    },
+    {
+      name: 'isDemo',
+      label: 'Dato de demostración',
+      type: 'checkbox',
+      defaultValue: false,
+      index: true,
+      admin: {
+        position: 'sidebar',
+        description: 'Reporte de prueba generado por el seed. No es seguridad ciudadana real.',
+      },
       access: {
         create: protectedField,
         update: protectedField,

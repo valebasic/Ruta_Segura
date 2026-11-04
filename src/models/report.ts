@@ -1,3 +1,4 @@
+import { formatDistance } from './geo'
 import type { Category, CommunityReport } from './types'
 
 export function normalizeReport(value: Record<string, any>): CommunityReport {
@@ -16,15 +17,18 @@ export function normalizeReport(value: Record<string, any>): CommunityReport {
       value.referencePoint || value.reference_point || value.address || 'Punto seleccionado',
     description: value.description || '',
     address: value.address,
-    distance: null,
+    distance: typeof value.distance_km === 'number' ? formatDistance(value.distance_km) : null,
+    distanceKm: typeof value.distance_km === 'number' ? value.distance_km : null,
     hasCoordinates:
       Number.isFinite(Number(value.latitude)) && Number.isFinite(Number(value.longitude)),
     time:
       value.createdAt || value.created_at
         ? new Intl.DateTimeFormat('es-CO', {
             dateStyle: 'medium',
+            timeStyle: 'short',
           }).format(new Date(value.createdAt || value.created_at))
         : 'Reciente',
+    createdAt: value.createdAt || value.created_at || null,
     status: value.status,
   }
 }

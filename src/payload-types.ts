@@ -217,6 +217,7 @@ export interface Admin {
 export interface User {
   id: number;
   name: string;
+  isDemo?: boolean | null;
   role?: ('community' | 'moderator') | null;
   createdBy?:
     | ({
@@ -290,7 +291,12 @@ export interface Municipality {
  */
 export interface RiskCategory {
   id: number;
-  name: 'ACOSO' | 'ILUMINACIÓN DEFICIENTE' | 'ZONA DESOLADA';
+  name:
+    | 'Acoso callejero'
+    | 'Robo o intento de robo'
+    | 'Violencia o agresión'
+    | 'Zona oscura o con poca iluminación'
+    | 'Zona solitaria o de riesgo';
   createdBy?:
     | ({
         relationTo: 'admins';
@@ -328,6 +334,10 @@ export interface Report {
   description: string;
   locationSource: 'gps' | 'manual';
   status: 'pending' | 'approved' | 'rejected' | 'hidden';
+  /**
+   * Reporte de prueba generado por el seed. No es seguridad ciudadana real.
+   */
+  isDemo?: boolean | null;
   owner: number | User;
   createdBy?:
     | ({
@@ -632,6 +642,7 @@ export interface AdminsSelect<T extends boolean = true> {
  */
 export interface UsersSelect<T extends boolean = true> {
   name?: T;
+  isDemo?: T;
   role?: T;
   createdBy?: T;
   updatedBy?: T;
@@ -690,6 +701,7 @@ export interface ReportsSelect<T extends boolean = true> {
   description?: T;
   locationSource?: T;
   status?: T;
+  isDemo?: T;
   owner?: T;
   createdBy?: T;
   updatedBy?: T;

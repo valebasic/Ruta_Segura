@@ -21,7 +21,8 @@ export function useSessionController() {
       .then((user) => {
         if (user) {
           setCurrentUser(user)
-          setScreen('reports')
+          // Solo sale de las pantallas de acceso: una respuesta tardía no debe pisar la navegación.
+          setScreen((current) => (current === 'register' || current === 'login' ? 'reports' : current))
         }
       })
       .catch(() => undefined)

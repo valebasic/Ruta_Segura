@@ -31,13 +31,7 @@ export function ProfilePage({
             <p className="mt-1 text-sm text-slate-500">{user?.email}</p>
           </div>
         </div>
-        <div className="mt-7 grid gap-3 sm:grid-cols-2">
-          <div className="rounded-2xl bg-slate-50 p-4">
-            <p className="text-xs font-semibold text-slate-500">Rol</p>
-            <p className="mt-1 font-bold text-slate-800">
-              {user?.role === 'moderator' ? 'Moderador' : 'Comunidad'}
-            </p>
-          </div>
+        <div className="mt-7 grid gap-3">
           <div className="rounded-2xl bg-slate-50 p-4">
             <p className="text-xs font-semibold text-slate-500">Municipio</p>
             <p className="mt-1 font-bold text-slate-800">Facatativá</p>
